@@ -6,8 +6,8 @@ import time
 def main():
     # 初始化交易所
     binance_exchange = ccxt.binance({
-        'timeout': 15000,
-        'enableRateLimit': True
+        'timeout': 15000,   #设置超时时间为15秒
+        'enableRateLimit': True #打开请求限制，防止交易所屏蔽
     })
 
     # 加载行情
@@ -20,21 +20,25 @@ def main():
 
     # step2
     # 找到同时以a和b计价的货币
+
     # 市场内的所有交易对
     symbols = list(markets.keys())
 
     # 存放到DataFrame()
     symbols_df = pd.DataFrame(data=symbols ,columns=['symbol'])
+    # print(symbols_df)
 
     # 分割字符串，得到 基础货币/计价货币
     base_quote_df = symbols_df['symbol'].str.split(pat='/', expand=True)
+    # print(base_quote_df)
     base_quote_df.columns = ['base', 'quote']
 
-    #过滤得到以a, b计价的计价货币
+    #筛选以BTC计价的交易对
     base_a_list = base_quote_df[base_quote_df['quote']== market_a]['base'].values.tolist()
+    # 筛选以ETH计价的交易对
     base_b_list = base_quote_df[base_quote_df['quote'] == market_b]['base'].values.tolist()
 
-    #获取相同的基础货币列表
+    #筛选出既以BTC计价，又以ETH计价的货币，取交集
     common_base_list = list(set(base_a_list).intersection(set(base_b_list)))
 
     # print('{}和{}共有{}个相同的计价货币'.format(market_a,market_b,len(common_base_list)))
@@ -103,8 +107,5 @@ def main():
     result_df.to_csv('./tri_arbitrage_results.csv', index=None)
 
 
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     main()
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
